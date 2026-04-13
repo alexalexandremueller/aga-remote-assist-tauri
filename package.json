@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "build:portable:win": "npm run build && tauri build --target x86_64-pc-windows-msvc",
+    "build:web": "vite build",
+    "build": "tauri build",
+    "build:portable:win": "npm run build:web && tauri build --bundles nsis --target x86_64-pc-windows-msvc",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build"

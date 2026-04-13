@@ -5,7 +5,7 @@
   "identifier": "br.com.hsistemas.aga-remote-assist",
   "build": {
     "beforeDevCommand": "npm run dev",
-    "beforeBuildCommand": "npm run build",
+    "beforeBuildCommand": "npm run build:web",
     "devUrl": "http://localhost:4174",
     "frontendDist": "../dist"
   },
@@ -24,7 +24,8 @@
   },
   "bundle": {
     "active": true,
-    "targets": "all",
-    "icon": []
+    "targets": [
+      "nsis"
+    ]
   }
 }

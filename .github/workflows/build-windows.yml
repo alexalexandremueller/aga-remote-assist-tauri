@@ -2,10 +2,14 @@ name: Build Windows EXE
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
 
 jobs:
   build:
     runs-on: windows-latest
+    env:
+      CI: true
 
     steps:
       - name: Checkout
@@ -14,35 +18,73 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: lts/*
+          cache: npm
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Install WebView2 runtime
+        shell: powershell
+        run: choco install microsoft-edge-webview2-runtime -y --no-progress
+
       - name: Install dependencies
         run: npm install
 
-      - name: Install Tauri CLI
-        run: npm install --save-dev @tauri-apps/cli
-
       - name: Build frontend
-        run: npm run build
+        run: npm run build:web
 
       - name: Build Tauri app
-        run: npx tauri build
+        id: tauri_build
+        continue-on-error: true
+        run: npx tauri build --bundles nsis
 
-      - name: Copy exe to release folder
+      - name: Debug release directory
+        if: always()
+        shell: powershell
+        run: |
+          Write-Host "Listing src-tauri\\target\\release"
+          if (Test-Path "src-tauri\target\release") {
+            dir "src-tauri\target\release" -Recurse
+          } else {
+            Write-Warning "Directory src-tauri\\target\\release does not exist."
+          }
+
+      - name: Fail with clear message when build step fails
+        if: steps.tauri_build.outcome != 'success'
+        shell: powershell
+        run: |
+          Write-Error "The Tauri build failed during the 'Build Tauri app' step. Review the step log above and the debug directory listing."
+          exit 1
+
+      - name: Collect Windows executables
+        if: steps.tauri_build.outcome == 'success'
         shell: powershell
         run: |
           New-Item -ItemType Directory -Force -Path release | Out-Null
-          $exe = Get-ChildItem -Path "src-tauri\target\release" -Filter *.exe |
-            Where-Object { $_.Name -notmatch "uninstall|setup" } |
-            Select-Object -First 1
-          if (-not $exe) { throw "Nenhum .exe encontrado" }
-          Copy-Item $exe.FullName "release\AGA-Remote-Assist.exe"
 
-      - name: Upload EXE
+          $portableExe = Get-ChildItem -Path "src-tauri\target\release" -Filter *.exe -ErrorAction SilentlyContinue |
+            Where-Object { $_.Name -notmatch "uninstall|setup|installer" } |
+            Select-Object -First 1
+
+          if (-not $portableExe) {
+            throw "Portable .exe not found in src-tauri\\target\\release."
+          }
+
+          Copy-Item $portableExe.FullName "release\AGA-Remote-Assist.exe" -Force
+
+          $installerExe = Get-ChildItem -Path "src-tauri\target\release\bundle\nsis" -Filter *.exe -ErrorAction SilentlyContinue |
+            Select-Object -First 1
+
+          if ($installerExe) {
+            Copy-Item $installerExe.FullName "release\$($installerExe.Name)" -Force
+          } else {
+            Write-Warning "NSIS installer not found in src-tauri\\target\\release\\bundle\\nsis."
+          }
+
+      - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: AGA-Remote-Assist
-          path: release/AGA-Remote-Assist.exe
+          name: aga-remote-assist-windows
+          if-no-files-found: error
+          path: release/*
