@@ -62,14 +62,14 @@ jobs:
           }
 
       - name: Fail with clear message when build step fails
-        if: steps.tauri_build.outcome != 'success'
+        if: steps.tauri_build.conclusion != 'success'
         shell: powershell
         run: |
           Write-Error "The Tauri build failed during the 'Build Tauri app' step. Review the step log above and the debug directory listing."
           exit 1
 
       - name: Collect Windows executables
-        if: steps.tauri_build.outcome == 'success'
+        if: steps.tauri_build.conclusion == 'success'
         shell: powershell
         run: |
           New-Item -ItemType Directory -Force -Path release | Out-Null
