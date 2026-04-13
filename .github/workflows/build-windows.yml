@@ -10,6 +10,7 @@ jobs:
     runs-on: windows-latest
     env:
       CI: true
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - name: Checkout
@@ -24,9 +25,19 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Install WebView2 runtime
+      - name: Check WebView2 runtime
         shell: powershell
-        run: choco install microsoft-edge-webview2-runtime -y --no-progress
+        run: |
+          $paths = @(
+            "C:\Program Files (x86)\Microsoft\EdgeWebView\Application",
+            "C:\Program Files\Microsoft\EdgeWebView\Application"
+          )
+          $installed = $paths | Where-Object { Test-Path $_ }
+          if ($installed) {
+            Write-Host "WebView2 runtime detected."
+          } else {
+            Write-Warning "WebView2 runtime path was not detected explicitly. Continuing because GitHub-hosted Windows runners usually already include the required runtime."
+          }
 
       - name: Install dependencies
         run: npm install

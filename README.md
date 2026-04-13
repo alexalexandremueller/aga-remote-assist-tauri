@@ -103,7 +103,7 @@ O workflow `.github/workflows/build-windows.yml` agora:
 - roda em `push` para `main`
 - instala Node LTS
 - instala Rust stable
-- instala o runtime do WebView2
+- verifica o WebView2 sem transformar isso em ponto de falha do pipeline
 - builda o frontend
 - builda o app Tauri para Windows com bundle `nsis`
 - publica os artefatos em `release/`
