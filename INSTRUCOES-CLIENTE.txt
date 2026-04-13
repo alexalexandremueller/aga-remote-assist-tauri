@@ -1,0 +1,15 @@
+AGA Remote Assist - Instrucoes para o cliente
+
+1. Baixe o arquivo AGA-Remote-Assist.exe.
+2. Salve o arquivo na sua Area de Trabalho ou na pasta Downloads.
+3. Clique duas vezes em AGA-Remote-Assist.exe para abrir.
+4. Se o Windows mostrar aviso de seguranca, clique em "Mais informacoes" e depois em "Executar assim mesmo", se confiar no envio deste arquivo.
+5. Quando o programa abrir, informe o codigo enviado pelo suporte.
+6. Aguarde a conexao com o atendente.
+7. Durante o atendimento, mantenha o programa aberto.
+8. Ao finalizar, feche o programa normalmente.
+
+Observacoes:
+- Nao precisa instalar.
+- Nao precisa permissao de administrador para uso normal.
+- Se o antivrus ou o navegador bloquear o arquivo, avise o suporte para novo envio.

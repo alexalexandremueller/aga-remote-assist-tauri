@@ -115,8 +115,8 @@ O workflow `.github/workflows/build-windows.yml` agora:
 - verifica o WebView2 sem transformar isso em ponto de falha do pipeline
 - builda o frontend
 - builda o app Tauri para Windows com bundle `nsis`
-- publica sempre o executável portátil em `release/`
-- adiciona ao artefato qualquer instalador `.msi` ou `setup.exe` encontrado no output do Tauri
+- publica os artefatos em `release/`
+- inclui `INSTRUCOES-CLIENTE.txt` junto com o executavel para envio ao cliente
 
 Para baixar o `.exe` via Actions:
 

@@ -105,6 +105,8 @@ jobs:
             Write-Warning "No installer files were found under src-tauri\\target. Uploading the portable executable only."
           }
 
+          Copy-Item "INSTRUCOES-CLIENTE.txt" "release\INSTRUCOES-CLIENTE.txt" -Force
+
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
