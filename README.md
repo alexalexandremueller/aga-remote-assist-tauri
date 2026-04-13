@@ -42,12 +42,14 @@ Diagnóstico da causa raiz mais provável:
 
 Em conjunto, isso tornava o pipeline frágil na etapa de empacotamento Windows. A correção aplicada separa o build web do build Tauri, limita o bundle ao alvo `nsis` no CI e melhora a coleta e o debug dos artefatos.
 
-Falha adicional confirmada durante a investigação:
+Falhas adicionais confirmadas durante a investigação:
 
 - o passo `Build Tauri app` passou em runs recentes, mas o workflow ainda falhava em `Collect Windows executables`
 - a causa era uma expressão regular no PowerShell que procurava `\\bundle\\nsis\\` ou `\\bundle\\msi\\` com barra final obrigatória
 - no runner Windows, o caminho do diretório normalmente termina como `...\\bundle\\nsis` sem barra final
 - isso gerava falso negativo na coleta do instalador, mesmo quando o bundle existia
+- em runs de 13 de abril de 2026, mesmo depois da correção de detecção, o Tauri continuou gerando de forma consistente o `.exe` portátil, mas sem um instalador NSIS/MSI verificável no output público do CI
+- por isso o workflow foi ajustado para sempre publicar o executável portátil e anexar qualquer instalador encontrado recursivamente, sem falhar quando o bundle instalador não existir
 
 Observação sobre logs:
 
@@ -113,7 +115,8 @@ O workflow `.github/workflows/build-windows.yml` agora:
 - verifica o WebView2 sem transformar isso em ponto de falha do pipeline
 - builda o frontend
 - builda o app Tauri para Windows com bundle `nsis`
-- publica os artefatos em `release/`
+- publica sempre o executável portátil em `release/`
+- adiciona ao artefato qualquer instalador `.msi` ou `setup.exe` encontrado no output do Tauri
 
 Para baixar o `.exe` via Actions:
 

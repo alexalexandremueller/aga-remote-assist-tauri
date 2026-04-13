@@ -91,15 +91,18 @@ jobs:
 
           Copy-Item $portableExe.FullName "release\AGA-Remote-Assist.exe" -Force
 
-          $bundleDirs = Get-ChildItem -Path "src-tauri\target" -Directory -Recurse -ErrorAction SilentlyContinue |
-            Where-Object { $_.FullName -match "\\bundle\\(nsis|msi)(\\|$)" }
+          $installerFiles = Get-ChildItem -Path "src-tauri\target" -Recurse -File -ErrorAction SilentlyContinue |
+            Where-Object {
+              $_.Extension -eq ".msi" -or
+              $_.Name -match "setup|installer"
+            }
 
-          if ($bundleDirs) {
-            foreach ($dir in $bundleDirs) {
-              Copy-Item (Join-Path $dir.FullName "*") "release\" -Recurse -Force -ErrorAction SilentlyContinue
+          if ($installerFiles) {
+            foreach ($file in $installerFiles) {
+              Copy-Item $file.FullName "release\" -Force
             }
           } else {
-            throw "No Windows bundle directories were found under src-tauri\\target. The portable executable was built, but no NSIS/MSI installer output was generated."
+            Write-Warning "No installer files were found under src-tauri\\target. Uploading the portable executable only."
           }
 
       - name: Upload Windows artifacts
