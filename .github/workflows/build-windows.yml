@@ -74,23 +74,26 @@ jobs:
         run: |
           New-Item -ItemType Directory -Force -Path release | Out-Null
 
-          $portableExe = Get-ChildItem -Path "src-tauri\target\release" -Filter *.exe -ErrorAction SilentlyContinue |
+          $portableExe = Get-ChildItem -Path "src-tauri\target" -Recurse -Filter *.exe -ErrorAction SilentlyContinue |
             Where-Object { $_.Name -notmatch "uninstall|setup|installer" } |
+            Sort-Object FullName |
             Select-Object -First 1
 
           if (-not $portableExe) {
-            throw "Portable .exe not found in src-tauri\\target\\release."
+            throw "Portable .exe not found anywhere under src-tauri\\target."
           }
 
           Copy-Item $portableExe.FullName "release\AGA-Remote-Assist.exe" -Force
 
-          $installerExe = Get-ChildItem -Path "src-tauri\target\release\bundle\nsis" -Filter *.exe -ErrorAction SilentlyContinue |
+          $installerExe = Get-ChildItem -Path "src-tauri\target" -Recurse -Filter *.exe -ErrorAction SilentlyContinue |
+            Where-Object { $_.FullName -match "\\bundle\\nsis\\" -or $_.Name -match "setup|installer" } |
+            Sort-Object FullName |
             Select-Object -First 1
 
           if ($installerExe) {
             Copy-Item $installerExe.FullName "release\$($installerExe.Name)" -Force
           } else {
-            Write-Warning "NSIS installer not found in src-tauri\\target\\release\\bundle\\nsis."
+            Write-Warning "NSIS installer not found anywhere under src-tauri\\target."
           }
 
       - name: Upload Windows artifacts
