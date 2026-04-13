@@ -92,7 +92,7 @@ jobs:
           Copy-Item $portableExe.FullName "release\AGA-Remote-Assist.exe" -Force
 
           $bundleDirs = Get-ChildItem -Path "src-tauri\target" -Directory -Recurse -ErrorAction SilentlyContinue |
-            Where-Object { $_.FullName -match "\\bundle\\(nsis|msi)\\" }
+            Where-Object { $_.FullName -match "\\bundle\\(nsis|msi)(\\|$)" }
 
           if ($bundleDirs) {
             foreach ($dir in $bundleDirs) {

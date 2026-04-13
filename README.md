@@ -42,6 +42,13 @@ Diagnóstico da causa raiz mais provável:
 
 Em conjunto, isso tornava o pipeline frágil na etapa de empacotamento Windows. A correção aplicada separa o build web do build Tauri, limita o bundle ao alvo `nsis` no CI e melhora a coleta e o debug dos artefatos.
 
+Falha adicional confirmada durante a investigação:
+
+- o passo `Build Tauri app` passou em runs recentes, mas o workflow ainda falhava em `Collect Windows executables`
+- a causa era uma expressão regular no PowerShell que procurava `\\bundle\\nsis\\` ou `\\bundle\\msi\\` com barra final obrigatória
+- no runner Windows, o caminho do diretório normalmente termina como `...\\bundle\\nsis` sem barra final
+- isso gerava falso negativo na coleta do instalador, mesmo quando o bundle existia
+
 Observação sobre logs:
 
 - foi possível confirmar publicamente que a falha ocorreu na etapa `Build Tauri app`
