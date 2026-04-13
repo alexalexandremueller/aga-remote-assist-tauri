@@ -99,7 +99,7 @@ jobs:
               Copy-Item (Join-Path $dir.FullName "*") "release\" -Recurse -Force -ErrorAction SilentlyContinue
             }
           } else {
-            Write-Warning "No Windows bundle directories were found under src-tauri\\target."
+            throw "No Windows bundle directories were found under src-tauri\\target. The portable executable was built, but no NSIS/MSI installer output was generated."
           }
 
       - name: Upload Windows artifacts
