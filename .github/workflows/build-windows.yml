@@ -60,6 +60,12 @@ jobs:
           } else {
             Write-Warning "Directory src-tauri\\target\\release does not exist."
           }
+          Write-Host "Listing bundle outputs under src-tauri\\target"
+          if (Test-Path "src-tauri\target") {
+            Get-ChildItem "src-tauri\target" -Recurse -ErrorAction SilentlyContinue |
+              Where-Object { $_.FullName -match "\\bundle\\" } |
+              Select-Object FullName
+          }
 
       - name: Fail with clear message when build step fails
         if: steps.tauri_build.conclusion != 'success'
@@ -85,15 +91,15 @@ jobs:
 
           Copy-Item $portableExe.FullName "release\AGA-Remote-Assist.exe" -Force
 
-          $installerExe = Get-ChildItem -Path "src-tauri\target" -Recurse -Filter *.exe -ErrorAction SilentlyContinue |
-            Where-Object { $_.FullName -match "\\bundle\\nsis\\" -or $_.Name -match "setup|installer" } |
-            Sort-Object FullName |
-            Select-Object -First 1
+          $bundleDirs = Get-ChildItem -Path "src-tauri\target" -Directory -Recurse -ErrorAction SilentlyContinue |
+            Where-Object { $_.FullName -match "\\bundle\\(nsis|msi)\\" }
 
-          if ($installerExe) {
-            Copy-Item $installerExe.FullName "release\$($installerExe.Name)" -Force
+          if ($bundleDirs) {
+            foreach ($dir in $bundleDirs) {
+              Copy-Item (Join-Path $dir.FullName "*") "release\" -Recurse -Force -ErrorAction SilentlyContinue
+            }
           } else {
-            Write-Warning "NSIS installer not found anywhere under src-tauri\\target."
+            Write-Warning "No Windows bundle directories were found under src-tauri\\target."
           }
 
       - name: Upload Windows artifacts
